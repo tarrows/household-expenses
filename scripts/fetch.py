@@ -1,11 +1,11 @@
 import csv
 import json
 import logging
-import gspread
 from datetime import datetime
 from pathlib import Path
 from typing import List
 
+import gspread
 
 logger = logging.getLogger(__name__)
 
@@ -24,20 +24,21 @@ def run():
 
     path_to_keyfile = Path('config') / config['keyfile']
 
-    sheet = config['sheets'][0]
-    sheetname = sheet['name']
-    ws = fetch_worksheet(path_to_keyfile, sheet['key'])
-    rows = ws.get_all_values()
-    logger.info(f'{sheetname} has {len(rows)} rows')
+    for sheet in config['sheets']:
+        name = sheet['name']
+        key = sheet['key']
+        ws = fetch_worksheet(path_to_keyfile, key)
+        rows = ws.get_all_values()
+        logger.info(f' {name} has {len(rows)} rows')
 
-    now = datetime.now().strftime('%Y-%m-%d_%H%M%S')
-    filename = f'{sheetname}_{now}.csv'
+        now = datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        filename = f'{name}_{now}.csv'
 
-    datafile = Path('data') / 'sheets' / filename
+        datafile = Path('data') / 'sheets' / filename
 
-    with datafile.open(mode='w', encoding='utf8', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerows(rows)
+        with datafile.open(mode='w', encoding='utf8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(rows)
 
 
 if __name__ == '__main__':
